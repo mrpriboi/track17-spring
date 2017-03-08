@@ -39,7 +39,7 @@ public class CountWords {
         String line;
         BufferedReader br = new BufferedReader(new FileReader(file));
         while ((line = br.readLine()) != null) {
-            try{
+            try {
                 sum += Integer.parseInt(line);
             } catch (NumberFormatException e) {
             }
@@ -59,20 +59,22 @@ public class CountWords {
         StringBuilder result = new StringBuilder("");
         try {
             BufferedReader br = new BufferedReader(new FileReader(file));
-            String line;
+            String line = null;
             while ((line = br.readLine()) != null) {
-                try {
-                    Integer.parseInt(line);
-                } catch (NumberFormatException e) {
-                    if (line.length() > 0) {
-                        result.append(" ");
+                if (line.length() > 0) {
+                    try {
+                        Integer.parseInt(line);
+                    } catch (NumberFormatException e) {
+                        if (result.length() > 0) {
+                            result.append(" ");
+                        }
+                        result.append(line);
                     }
-                    result.append(line);
                 }
             }
-        } catch(Exception e){
+        } catch (Exception e) {
         }
-        String s = new String(result);
-        return s;
+        String sum = new String(result);
+        return sum;
     }
 }
