@@ -21,7 +21,6 @@ public class MyLinkedListTest {
     public void listAdd() throws Exception {
         List list = new MyLinkedList();
         list.add(1);
-
         Assert.assertTrue(list.size() == 1);
     }
 

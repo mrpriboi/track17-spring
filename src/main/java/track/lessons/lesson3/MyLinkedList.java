@@ -73,7 +73,7 @@ public class MyLinkedList extends List {
             throw new NoSuchElementException();
         }
         Node idxnode = getnode(idx);
-        ifgit s (idxnode.next != null) {
+        if (idxnode.next != null) {
             idxnode.next.prev = idxnode.prev;
         }
         if (idxnode.prev != null) {
