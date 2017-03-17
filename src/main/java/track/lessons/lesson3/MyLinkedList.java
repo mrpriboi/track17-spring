@@ -26,22 +26,75 @@ public class MyLinkedList extends List {
         }
     }
 
+    private Node head = null;
+    private Node tail = null;
+
+    public MyLinkedList() {
+    }
+
     @Override
     void add(int item) {
+        size += 1;
+        if (tail == null) {
+            Node element = new Node(null,null,item);
+            head = element;
+            tail = element;
+            return;
+        } else {
+            Node element = new Node(tail,null,item);
+            tail.next = element;
+            tail = element;
+            return;
+        }
+    }
+
+    private Node getnode(int idx) {
+        Node current;
+        if (idx < size / 2) {
+            current = head;
+            while (idx > 0) {
+                current = current.next;
+                idx -= 1;
+            }
+        } else {
+            idx = size - idx - 1;
+            current = tail;
+            while (idx > 0) {
+                current = current.prev;
+                idx -= 1;
+            }
+        }
+        return current;
     }
 
     @Override
     int remove(int idx) throws NoSuchElementException {
-        return 0;
+        if (idx >= size || idx < 0) {
+            throw new NoSuchElementException();
+        }
+        Node idxnode = getnode(idx);
+        ifgit s (idxnode.next != null) {
+            idxnode.next.prev = idxnode.prev;
+        }
+        if (idxnode.prev != null) {
+            idxnode.prev.next = idxnode.next;
+        }
+        if (idx == 0) {
+            head = head.next;
+        }
+        if (idx == size - 1) {
+            tail = tail.prev;
+        }
+        size -= 1;
+        return idxnode.val;
     }
 
     @Override
     int get(int idx) throws NoSuchElementException {
-        return 0;
+        if (idx >= size || idx < 0 ) {
+            throw new NoSuchElementException();
+        }
+        return getnode(idx).val;
     }
 
-    @Override
-    int size() {
-        return 0;
-    }
 }
