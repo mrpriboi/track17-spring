@@ -47,15 +47,10 @@ public class MyArrayList extends List {
         if (idx > size || idx < 0) {
             throw new NoSuchElementException();
         }
-        array[idx] = 0;
-        int index = idx;
-        while (index != size) {
-            array[index] = array[index + 1];
-            index++;
-        }
+        System.arraycopy(array, idx + 1, array, idx, size - idx);
         array[size] = 0;
         size--;
-        return 0;
+        return array[idx];
     }
 
     @Override
