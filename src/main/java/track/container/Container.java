@@ -1,8 +1,12 @@
 package track.container;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+<<<<<<< HEAD
 import java.util.HashMap;
+=======
+>>>>>>> master
 
 import track.container.config.Bean;
 import track.container.config.InvalidConfigurationException;
@@ -17,6 +21,7 @@ import java.lang.reflect.Method;
  * У него определено 2 публичных метода, можете дописывать свои методы и конструкторы
  */
 public class Container {
+<<<<<<< HEAD
     private Map<String, Object> objByName;
     private Map<String, Object> objByClassName;
     List<Bean> beans;
@@ -32,6 +37,17 @@ public class Container {
         try {
             objByName.put(bean.getId(), Class.forName(bean.getClassName()).newInstance());
             objByClassName.put(bean.getClassName(), objByName.get(bean.getId()));
+=======
+
+    Map<String, Object> map = new HashMap<>();
+
+    // Реализуйте этот конструктор, используется в тестах!
+    public Container(List<Bean> beans) throws Exception {
+
+    }
+
+    public static void main(String[] args) throws Exception {
+>>>>>>> master
 
             Object obj = getById(bean.getId());
             Class cl = obj.getClass();
