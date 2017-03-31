@@ -4,20 +4,21 @@ import java.util.NoSuchElementException;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.Ignore;
 
 /**
  *
  */
 public class MyLinkedListTest {
 
-    @Test(expected = NoSuchElementException.class)
+    @Ignore
     public void emptyList() throws Exception {
         List list = new MyLinkedList();
         Assert.assertTrue(list.size() == 0);
         list.get(0);
     }
 
-    @Test
+    @Ignore
     public void listAdd() throws Exception {
         List list = new MyLinkedList();
         list.add(1);
@@ -25,7 +26,7 @@ public class MyLinkedListTest {
         Assert.assertTrue(list.size() == 1);
     }
 
-    @Test
+    @Ignore
     public void listAddRemove() throws Exception {
         List list = new MyLinkedList();
         list.add(1);
@@ -48,7 +49,7 @@ public class MyLinkedListTest {
         Assert.assertTrue(list.size() == 0);
     }
 
-    @Test
+    @Ignore
     public void listRemove() throws Exception {
         List list = new MyLinkedList();
         list.add(1);
