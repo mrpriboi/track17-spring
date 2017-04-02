@@ -11,7 +11,7 @@ import java.util.NoSuchElementException;
  */
 public class MyArrayList extends List {
 
-    private int defaultsize = 64;
+    private final int defaultsize = 64;
 
     private int[] array;
     private int arraycapacity = 0; //размер массива
@@ -27,7 +27,7 @@ public class MyArrayList extends List {
     }
 
     public void realloc() {
-        arraycapacity += 64;
+        arraycapacity *= 2;
         int[] newarray = new int[arraycapacity];
         System.arraycopy(array, 0, newarray, 0, size);
         array = newarray;
