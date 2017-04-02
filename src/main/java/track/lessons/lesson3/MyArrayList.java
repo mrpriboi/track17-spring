@@ -11,7 +11,7 @@ import java.util.NoSuchElementException;
  */
 public class MyArrayList extends List {
 
-    private final int defaultsize = 64;
+    private static final int defaultsize = 64;
 
     private int[] array;
     private int arraycapacity = 0; //размер массива
