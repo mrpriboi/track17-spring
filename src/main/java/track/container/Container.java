@@ -1,17 +1,17 @@
 package track.container;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 
 import track.container.config.Bean;
-import track.container.config.InvalidConfigurationException;
 import track.container.config.Property;
-import track.container.config.ValueType;
+import track.container.config.InvalidConfigurationException;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+import static track.container.config.ValueType.VAL;
+
+
 
 /**
  * Основной класс контейнера
@@ -19,41 +19,62 @@ import java.lang.reflect.Method;
  */
 public class Container {
 
-    private Map<String, Object> objByName;
-    private Map<String, Object> objByClassName;
-    List<Bean> beans;
+    private List<Bean> beans;
+    Map<String, Object> objByName;
+    Map<String, Object> objByClassName;
+
 
     // Реализуйте этот конструктор, используется в тестах!
     public Container(List<Bean> beans) throws InvalidConfigurationException {
-        objByName = new HashMap<>();
-        objByClassName = new HashMap<>();
         this.beans = beans;
-
     }
 
     private Object makeObject(Bean bean) throws InvalidConfigurationException {
+        Class clazz;
         try {
-            objByName.put(bean.getId(), Class.forName(bean.getClassName()).newInstance());
-            objByClassName.put(bean.getClassName(), objByName.get(bean.getId()));
+            clazz = Class.forName(bean.getClassName());
+            Object obj = clazz.newInstance();
 
-            Object current = getById(bean.getId());
-            Class cl = current.getClass();
-            for (Property property : bean.getProperties().values()) {
-                StringBuilder name = new StringBuilder(property.getName());
-                Field currentField = cl.getDeclaredField(name.toString());
-                name.setCharAt(0, Character.toUpperCase(name.charAt(0)));
-                Method setMethod = cl.getDeclaredMethod("set" + name, currentField.getType());
-                if (property.getType().equals(ValueType.VAL)) {
-                    if (isPrimitive(currentField.getType().toString())) {
-                        setMethod.invoke(current, Integer.parseInt(property.getValue()));
-                    } else {
-                        throw new Exception("Invalid type");
+            for (Map.Entry<String, Property> entry : bean.getProperties().entrySet()) {
+                Field field = clazz.getDeclaredField(entry.getKey());
+                field.setAccessible(true);
+                if (entry.getValue().getType() == VAL) {
+                    switch (field.getType().toString()) {
+                        case "byte":
+                            field.set(obj, Byte.parseByte(entry.getValue().getValue()));
+                            break;
+                        case "short":
+                            field.set(obj, Short.parseShort(entry.getValue().getValue()));
+                            break;
+                        case "char":
+                            field.set(obj, entry.getValue().getValue().charAt(0));
+                            break;
+                        case "int":
+                            field.set(obj, Integer.parseInt(entry.getValue().getValue()));
+                            break;
+                        case "long":
+                            field.set(obj, Long.parseLong(entry.getValue().getValue()));
+                            break;
+                        case "float":
+                            field.set(obj, Float.parseFloat(entry.getValue().getValue()));
+                            break;
+                        case "double":
+                            field.set(obj, Double.parseDouble(entry.getValue().getValue()));
+                            break;
+                        case "boolean":
+                            field.set(obj, Boolean.parseBoolean(entry.getValue().getValue()));
+                            break;
+                        case "String":
+                            field.set(obj, entry.getValue().getValue());
+                            break;
+                        default:
+                            break;
                     }
                 } else {
-                    setMethod.invoke(current, getByClass(currentField.getType().getTypeName()));
+                    field.set(obj, getById(entry.getValue().getValue()));
                 }
             }
-            return current;
+            return obj;
         } catch (Exception e) {
             throw new InvalidConfigurationException(e.getMessage());
         }
@@ -61,8 +82,8 @@ public class Container {
 
 
     /**
-     *  Вернуть объект по имени бина из конфига
-     *  Например, Car car = (Car) container.getById("carBean")
+     * Вернуть объект по имени бина из конфига
+     * Например, Car car = (Car) container.getById("carBean")
      */
     public Object getById(String id) throws InvalidConfigurationException {
         if (objByName.containsKey(id)) {
@@ -92,12 +113,6 @@ public class Container {
             }
             return null;
         }
-    }
-
-    private boolean isPrimitive(String type) {
-        return type.equals("int") || type.equals("boolean") || type.equals("short") ||
-                type.equals("long") || type.equals("char") || type.equals("byte") ||
-                type.equals("float") || type.equals("double") || type.equals("String");
     }
 
 }
