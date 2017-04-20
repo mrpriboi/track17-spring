@@ -1,6 +1,5 @@
 package track.msgtest.messenger.teacher.client;
 
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -11,6 +10,7 @@ import java.util.Scanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import track.msgtest.messenger.messages.LoginMessage;
 import track.msgtest.messenger.messages.Message;
 import track.msgtest.messenger.messages.TextMessage;
 import track.msgtest.messenger.messages.Type;
@@ -27,13 +27,12 @@ public class MessengerClient {
 
     /**
      * Механизм логирования позволяет более гибко управлять записью данных в лог (консоль, файл и тд)
-     * */
+     */
     static Logger log = LoggerFactory.getLogger(MessengerClient.class);
 
     /**
      * Протокол, хост и порт инициализируются из конфига
-     *
-     * */
+     */
     private Protocol protocol;
     private int port;
     private String host;
@@ -78,7 +77,7 @@ public class MessengerClient {
      */
         Thread socketListenerThread = new Thread(() -> {
             final byte[] buf = new byte[1024 * 64];
-            log.info("Starting listener thread...");
+            System.out.println("Starting listener thread...");
             while (!Thread.currentThread().isInterrupted()) {
                 try {
                     // Здесь поток блокируется на ожидании данных
@@ -105,6 +104,8 @@ public class MessengerClient {
      */
     public void onMessage(Message msg) {
         log.info("Message received: {}", msg);
+        TextMessage newMsg = (TextMessage) msg;
+        System.out.println(newMsg.getText());
     }
 
     /**
@@ -112,12 +113,16 @@ public class MessengerClient {
      * Формат строки можно посмотреть в вики проекта
      */
     public void processInput(String line) throws IOException, ProtocolException {
-        String[] tokens = line.split(" ");
+        String[] tokens = line.split(";");
         log.info("Tokens: {}", Arrays.toString(tokens));
         String cmdType = tokens[0];
         switch (cmdType) {
             case "/login":
-                // TODO: реализация
+                LoginMessage login = new LoginMessage();
+                login.setType(Type.MSG_LOGIN);
+                login.setName(tokens[1]);
+                login.setPass(tokens[2]);
+                send(login);
                 break;
             case "/help":
                 // TODO: реализация
@@ -149,7 +154,7 @@ public class MessengerClient {
 
         MessengerClient client = new MessengerClient();
         client.setHost("localhost");
-        client.setPort(19000);
+        client.setPort(9000);
         client.setProtocol(new StringProtocol());
 
         try {
@@ -160,9 +165,6 @@ public class MessengerClient {
             System.out.println("$");
             while (true) {
                 String input = scanner.nextLine();
-                if ("q".equals(input)) {
-                    return;
-                }
                 try {
                     client.processInput(input);
                 } catch (ProtocolException | IOException e) {

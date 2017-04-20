@@ -3,6 +3,7 @@ package track.msgtest.messenger.net;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import track.msgtest.messenger.messages.LoginMessage;
 import track.msgtest.messenger.messages.Message;
 import track.msgtest.messenger.messages.TextMessage;
 import track.msgtest.messenger.messages.Type;
@@ -30,6 +31,11 @@ public class StringProtocol implements Protocol {
                 textMsg.setText(tokens[2]);
                 textMsg.setType(type);
                 return textMsg;
+            case MSG_LOGIN:
+                LoginMessage loginMsg = new LoginMessage();
+                loginMsg.setName(tokens[1]);
+                loginMsg.setPass(tokens[2]);
+                return loginMsg;
             default:
                 throw new ProtocolException("Invalid type: " + type);
         }
@@ -46,10 +52,16 @@ public class StringProtocol implements Protocol {
                 builder.append(String.valueOf(sendMessage.getSenderId())).append(DELIMITER);
                 builder.append(sendMessage.getText()).append(DELIMITER);
                 break;
+            case MSG_LOGIN:
+                LoginMessage loginMsg = (LoginMessage) msg;
+                builder.append(String.valueOf(loginMsg.getName())).append(DELIMITER);
+                //System.out.println("SEE HERE!!!!" + builder.toString());
+                builder.append(String.valueOf(loginMsg.getPass())).append(DELIMITER);
+                //System.out.println("SEE HERE!!!!" + builder.toString());
+                break;
+
             default:
                 throw new ProtocolException("Invalid type: " + type);
-
-
         }
         log.info("encoded: {}", builder.toString());
         return builder.toString().getBytes();

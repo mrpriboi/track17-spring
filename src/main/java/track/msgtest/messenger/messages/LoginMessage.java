@@ -7,6 +7,10 @@ public class LoginMessage extends Message {
     private String name;
     private String pass;
 
+    public LoginMessage(){
+        type = Type.MSG_LOGIN;
+    }
+
     public LoginMessage(String name, String pass) {
         type = Type.MSG_LOGIN;
         this.name = name;
