@@ -10,10 +10,8 @@ import java.util.Scanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import track.msgtest.messenger.messages.LoginMessage;
-import track.msgtest.messenger.messages.Message;
-import track.msgtest.messenger.messages.TextMessage;
-import track.msgtest.messenger.messages.Type;
+import track.msgtest.messenger.messages.*;
+import track.msgtest.messenger.net.BinaryProtocol;
 import track.msgtest.messenger.net.Protocol;
 import track.msgtest.messenger.net.ProtocolException;
 import track.msgtest.messenger.net.StringProtocol;
@@ -117,6 +115,13 @@ public class MessengerClient {
         log.info("Tokens: {}", Arrays.toString(tokens));
         String cmdType = tokens[0];
         switch (cmdType) {
+            case "/register":
+                RegisterMessage regs = new RegisterMessage();
+                regs.setType(Type.MSG_REGISTRATION);
+                regs.setName(tokens[1]);
+                regs.setPass(tokens[2]);
+                send(regs);
+                break;
             case "/login":
                 LoginMessage login = new LoginMessage();
                 login.setType(Type.MSG_LOGIN);
@@ -155,7 +160,7 @@ public class MessengerClient {
         MessengerClient client = new MessengerClient();
         client.setHost("localhost");
         client.setPort(9000);
-        client.setProtocol(new StringProtocol());
+        client.setProtocol(new BinaryProtocol());
 
         try {
             client.initSocket();

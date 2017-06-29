@@ -1,18 +1,20 @@
-package track.msgtest.messenger;
+package track.msgtest.messenger.messages;
 
 /**
  *
  */
-public class User {
-    private static long idCount = 0;
+public class RegisterMessage extends Message {
     private String name;
     private String pass;
-    private long id;
 
-    public User(String name, String pass) {
+    public RegisterMessage(){
+        type = Type.MSG_REGISTRATION;
+    }
+
+    public RegisterMessage(String name, String pass) {
+        type = Type.MSG_LOGIN;
         this.name = name;
         this.pass = pass;
-        this.id = idCount++;
     }
 
     public String getName() {
@@ -33,21 +35,9 @@ public class User {
 
     @Override
     public String toString() {
-        return "User{" +
+        return "RegisterMessage{" +
                 "name='" + name + '\'' +
                 ", pass='" + pass + '\'' +
                 '}';
-    }
-
-    public boolean checkName(String name) {
-        return (this.name.equals(name));
-    }
-
-    public boolean checkPassword(String password) {
-        return (this.pass.equals(password));
-    }
-
-    public long getId() {
-        return this.id;
     }
 }

@@ -6,21 +6,26 @@ import java.net.Socket;
 import java.io.IOException;
 import java.util.*;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
 import track.msgtest.messenger.User;
 
 /**
  *
  */
 public class MessengerServer implements Runnable {
-    private int serverPort = 9000;
+    private final int serverPort = 9000;
     private ServerSocket serverSocket = null;
     private boolean isStopped = false;
-    private ArrayList<User> userTable = null;
+    private static Connection connection = null;
     private Map<Long, OutputStream> userOnline = null;
 
-    public MessengerServer(int port, ArrayList<User> table, Map<Long, OutputStream> base) {
-        this.serverPort = port;
-        this.userTable = table;
+    public MessengerServer(Connection connection, Map<Long, OutputStream> base) {
+        this.connection = connection;
         this.userOnline = base;
     }
 
@@ -40,7 +45,7 @@ public class MessengerServer implements Runnable {
                 throw new RuntimeException("Error accepting client connection", e);
             }
             new Thread(
-                    new Worker(clientSocket, userTable, userOnline)
+                    new Worker(clientSocket,connection, userOnline)
             ).start();
         }
         System.out.println("Server Stopped.");
@@ -70,15 +75,37 @@ public class MessengerServer implements Runnable {
     }
 
     public static void main(String[] args) {
-        final int PORT_WORK = 9000;
         final int PORT_STOP = 9001;
-        User user1 = new User("admin", "password");
-        User user2 = new User("user", "password");
-        ArrayList<User> users = new ArrayList<User>();
-        users.add(user1);
-        users.add(user2);
+        final String sql = "SELECT * FROM users;";
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/Messenger", "root", "Mysql97");
+            Statement stmt = null;
+            ResultSet rs = null;
+
+            stmt = connection.createStatement();
+
+            // 4) Набор "строк" таблицы - результат SELECT
+            rs = stmt.executeQuery(sql);
+
+            // 5) Структура ResultSet - получаем строки, пока есть
+            while (rs.next()) {
+            // Column index starts with 1
+                Integer id = rs.getInt(1);          // 1 - ID
+                String name = rs.getString("login"); // 2 - name
+                String pass = rs.getString("password");     // 3 - age
+
+            System.out.println(String.format("ID: %d, name: %s, password: %s", id, name, pass));
+            }
+        } catch (SQLException ex) {
+            System.out.println("SQLException: " + ex.getMessage());
+            System.out.println("SQLState: " + ex.getSQLState());
+            System.out.println("VendorError: " + ex.getErrorCode());
+        } catch (Exception e) {
+            System.out.println("Unluck :( " + e.getMessage());
+        }
         Map<Long, OutputStream> base = new HashMap<Long, OutputStream>();
-        MessengerServer server = new MessengerServer(PORT_WORK, users, base);
+        MessengerServer server = new MessengerServer(connection, base);
         new Thread(server).start();
         try {
             Thread monitor = new StopMonitor(PORT_STOP);

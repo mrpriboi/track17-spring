@@ -5,39 +5,33 @@ import org.slf4j.LoggerFactory;
 
 import org.apache.commons.lang3.SerializationUtils;
 
-import track.msgtest.messenger.messages.LoginMessage;
-import track.msgtest.messenger.messages.Message;
-import track.msgtest.messenger.messages.TextMessage;
-import track.msgtest.messenger.messages.Type;
+import track.msgtest.messenger.messages.*;
 
 
 /**
  * Простейший протокол передачи данных
  */
-public class StringProtocol implements Protocol {
+public class BinaryProtocol implements Protocol {
 
-    static Logger log = LoggerFactory.getLogger(StringProtocol.class);
+    static Logger log = LoggerFactory.getLogger(BinaryProtocol.class);
 
     public static final String DELIMITER = ";";
 
     @Override
     public Message decode(byte[] bytes) throws ProtocolException {
-        String str = new String(bytes);
-        log.info("decoded: {}", str);
-        String[] tokens = str.split(DELIMITER);
-        Type type = Type.valueOf(tokens[0]);
+        Message msg = (Message) SerializationUtils.deserialize(bytes);
+        log.info("decoded: {}", msg.toString());
+        Type type = msg.getType();
         switch (type) {
             case MSG_TEXT:
-                TextMessage textMsg = new TextMessage();
-                textMsg.setSenderId(parseLong(tokens[1]));
-                textMsg.setText(tokens[2]);
-                textMsg.setType(type);
+                TextMessage textMsg = (TextMessage) msg;
                 return textMsg;
             case MSG_LOGIN:
-                LoginMessage loginMsg = new LoginMessage();
-                loginMsg.setName(tokens[1]);
-                loginMsg.setPass(tokens[2]);
+                LoginMessage loginMsg = (LoginMessage) msg;
                 return loginMsg;
+            case MSG_REGISTRATION:
+                RegisterMessage regMsg = (RegisterMessage) msg;
+                return regMsg;
             default:
                 throw new ProtocolException("Invalid type: " + type);
         }
@@ -45,28 +39,28 @@ public class StringProtocol implements Protocol {
 
     @Override
     public byte[] encode(Message msg) throws ProtocolException {
-        StringBuilder builder = new StringBuilder();
         Type type = msg.getType();
-        builder.append(type).append(DELIMITER);
+        byte[] data = new byte[1024 * 64];
         switch (type) {
+            case MSG_REGISTRATION:
+                RegisterMessage regMsg = (RegisterMessage) msg;
+                data = SerializationUtils.serialize(regMsg);
+                break;
             case MSG_TEXT:
                 TextMessage sendMessage = (TextMessage) msg;
-                builder.append(String.valueOf(sendMessage.getSenderId())).append(DELIMITER);
-                builder.append(sendMessage.getText()).append(DELIMITER);
+                data = SerializationUtils.serialize(sendMessage);
                 break;
             case MSG_LOGIN:
                 LoginMessage loginMsg = (LoginMessage) msg;
-                builder.append(String.valueOf(loginMsg.getName())).append(DELIMITER);
+                data = SerializationUtils.serialize(loginMsg);
                 //System.out.println("SEE HERE!!!!" + builder.toString());
-                builder.append(String.valueOf(loginMsg.getPass())).append(DELIMITER);
                 //System.out.println("SEE HERE!!!!" + builder.toString());
                 break;
-
             default:
                 throw new ProtocolException("Invalid type: " + type);
         }
-        log.info("encoded: {}", builder.toString());
-        return builder.toString().getBytes();
+        log.info("encoded: {}", msg.toString());
+        return data;
     }
 
     private Long parseLong(String str) {
